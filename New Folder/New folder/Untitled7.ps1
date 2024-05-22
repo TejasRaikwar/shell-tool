@@ -1,7 +1,6 @@
 ﻿Import-Module Microsoft.Online.SharePoint.PowerShell
 
-$username = "isriadmin@sharepointistech.onmicrosoft.com"
-$password = "Import@2024#"
+
 $cred = New-Object -TypeName System.Management.Automation.PSCredential -argumentlist $userName, $(convertto-securestring $Password -asplaintext -force)
  
 Connect-SPOService -Url https://sharepointistech-admin.sharepoint.com -Credential $cred

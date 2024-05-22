@@ -5,7 +5,7 @@
 Function CopyList([String] $SourceWebURL, [string]$TargetWebURL, [String]$ListName, [string]$BackupPath)
 {
     # Get Source List
-    $SourceList = (Get-SPWeb $SourceWebURL).Lists[$ListName]
+    $SourceList = (Get-PnPWeb $SourceWebURL).Lists[$ListName]
 
     #Export the list fro, source web
     Export-SPweb $SourceWebURL -ItemUrl $SourceList.defaultViewUrl -IncludeuserSecurity _IncludeVersions All -path ($BackupPath + $ListName +".cmp") -nologfile -Force
@@ -16,7 +16,7 @@ Function CopyList([String] $SourceWebURL, [string]$TargetWebURL, [String]$ListNa
 }
 
 #Get All List Names
-$Lists = @($(Get-SPWeb $SourceWebURL).lists)
+$Lists = @($(Get-PnPWeb $SourceWebURL).lists)
 
 foreach($List in $Lists)
 {
