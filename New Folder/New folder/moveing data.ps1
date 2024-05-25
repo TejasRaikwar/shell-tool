@@ -47,7 +47,6 @@ Function Archive-ListItems() {
             $ListItem[“Address”] = $SourceItem[“Address”]
             $ListItem[“Designation”] = $SourceItem[“Designation”]
             $ListItem.update()
-            $SourceList.GetItemById($SourceItem.Id).DeleteObject()
             $counter++
 
         }
