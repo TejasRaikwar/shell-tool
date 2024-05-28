@@ -1,54 +1,56 @@
-# Load SharePoint CSOM Assemblies
-Add-Type -Path "C:\Program Files\Common Files\Microsoft Shared\Web Server Extensions\16\ISAPI\Microsoft.SharePoint.Client.dll"
-Add-Type -Path "C:\Program Files\Common Files\Microsoft Shared\Web Server Extensions\16\ISAPI\Microsoft.SharePoint.Client.Runtime.dll"
+#Load SharePoint CSOM Assemblies
+Add-Type -Path “C:\Program Files\Common Files\Microsoft Shared\Web Server Extensions\16\ISAPI\Microsoft.SharePoint.Client.dll”
+Add-Type -Path “C:\Program Files\Common Files\Microsoft Shared\Web Server Extensions\16\ISAPI\Microsoft.SharePoint.Client.Runtime.dll”
 
-Function CopyData {
-    param(
-        [String] $SourceWebURL,
-        [pscredential] $SourceCredentials,
-        [String] $TargetWebURL,
-        [pscredential] $TargetCredentials,
-        [String] $ListName
-    )
-
-    # Create Source Context
+Function CopyData(
+    [String] $SourceWebURL,
+    [pscredential] $SourceCredentials,
+    [String] $TargetWebURL,
+    [pscredential] $TargetCredentials,
+    [String] $ListName
+){
+    #Create Source Context
     $SourceCredentials = New-Object Microsoft.SharePoint.Client.SharePointOnlineCredentials($SourceCredentials.UserName, $SourceCredentials.Password)
+    
     $SourceContext = New-Object Microsoft.SharePoint.Client.ClientContext($SourceWebURL)
     $SourceContext.Credentials = $SourceCredentials
     $SourceContext.Load($SourceContext.Web)
     $SourceContext.ExecuteQuery()
 
-    # Create Target Context
+
+    #Create Target Context
     $TargetCredentials = New-Object Microsoft.SharePoint.Client.SharePointOnlineCredentials($TargetCredentials.UserName, $TargetCredentials.Password)
+
     $TargetContext = New-Object Microsoft.SharePoint.Client.ClientContext($TargetWebURL)
-    $TargetContext.Credentials = $TargetCredentials
+    $TargetContext.Credentials = $targetCredentials
     $TargetContext.Load($TargetContext.Web)
     $TargetContext.ExecuteQuery()
 
-    # Get the Source List and Target Lists
-    $SourceList = $SourceContext.Web.Lists.GetByTitle($ListName)
+
+    #Get the Source List and Target Lists
+    $SourceList = $Context.Web.Lists.GetByTitle($ListName)
     $SourceContext.Load($SourceList)
     $SourceContext.ExecuteQuery()
 
-    $TargetList = $TargetContext.Web.Lists.GetByTitle($ListName)
+    $TargetList = $Context.Web.Lists.GetByTitle($ListName)
     $TargetContext.Load($TargetList)
     $TargetContext.ExecuteQuery()
 
-    # Get All Items from Source List
-    $listItems = $SourceList.GetItems([Microsoft.SharePoint.Client.CamlQuery]::CreateAllItemsQuery())
+    #Get All Items from Source List
+    $listItems = $ListName.GetItems([Microsoft.SharePoint.Client.CamlQuery]::CreateAllItemsQuery())
     $SourceContext.Load($listItems)
     $SourceContext.ExecuteQuery()
 
     $counter = 0
 
+    
     Try {
-        # Get each column value from source list and add them to target
+        #Get each column value from source list and add them to target
         ForEach ($SourceItem in $listItems) {
             $NewItem = New-Object Microsoft.SharePoint.Client.ListItemCreationInformation
             $ListItem = $TargetList.AddItem($NewItem)
 
-            foreach ($field in $SourceItem.FieldValues.GetEnumerator()) {
-                Write-Host "entered"
+            foreach($field in $SourceItem.FieldValues.GetEnumerator()){
                 $FieldName = $field.Key
                 $FieldValue = $field.Value
 
@@ -56,28 +58,29 @@ Function CopyData {
             }
             # $ListItem.update()
             $counter++
+
         }
-        # $TargetContext.ExecuteQuery()
-        # Write-Host -f Green “Total List Items Copied from ‘$SourceListTitle’ to ‘$TargetListTitle’ : $counter”
+        # $Context.ExecuteQuery()
+        # write-host -f Green “Total List Items Copied from ‘$SourceListTitle’ to ‘$TargetListTitle’ : $counter”
     }
     Catch {
-        Write-Host -f Red “Error Copying List Items!” $_.Exception.Message
+        write-host -f Red “Error Copying List Items!” $_.Exception.Message
     }
 }
 
-Function CopyList {
-    param(
-        [String] $SourceWebURL,
-        [String] $TargetWebURL,
-        [String] $ListName,
-        [String] $BackupPath
-    )
 
+
+Function CopyList(
+    [String] $SourceWebURL,
+    [String] $TargetWebURL, 
+    [String] $ListName, 
+    [String] $BackupPath)
+{
     # Connect to the source site
     Connect-PnPOnline -Url $SourceWebURL -UseWebLogin
 
     # Export the list schema (not data) from the source
-    $TemplatePath = Join-Path -Path $BackupPath -ChildPath "$ListName.xml"
+    $TemplatePath = Join-Path -Path $BackupPath -ChildPath "$ListName.xml" 
     Get-PnPProvisioningTemplate -Out $TemplatePath -Handlers Lists -ListsToExtract $ListName
 
     # Connect to the target site
@@ -123,13 +126,12 @@ Function CopyList {
         }
     }
 }
-
 # Source and target site URLs
 $SourceWebURL = "https://sharepointistech.sharepoint.com/sites/testTejas"
 $SourceCredentials = Get-Credential
 $TargetWebURL = "https://sharepointistech.sharepoint.com/sites/dstSite"
 $TargetCredentials = Get-Credential
-$BackupPath = "C:\Temp"
+$BackupPath   = "C:\Temp"
 
 # Connect to the source site to get all lists
 Connect-PnPOnline -Url $SourceWebURL -UseWebLogin
