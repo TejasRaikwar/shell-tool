@@ -39,7 +39,7 @@ Function Archive-ListItems() {
         ForEach ($SourceItem in $listItems) {
             $NewItem = New-Object Microsoft.SharePoint.Client.ListItemCreationInformation
             $ListItem = $TargetList.AddItem($NewItem)
-
+            Write-Host $SourceItem.Title
             #Map each field from source list to target list
             $ListItem[“Name”] = $SourceItem[“Name”]
             $ListItem[“Title”] = $SourceItem[“Title”]
@@ -47,11 +47,10 @@ Function Archive-ListItems() {
             $ListItem[“Address”] = $SourceItem[“Address”]
             $ListItem[“Designation”] = $SourceItem[“Designation”]
             $ListItem.update()
-            #$SourceList.GetItemById($SourceItem.Id).DeleteObject()
             $counter++
 
         }
-        $Context.ExecuteQuery()
+        #$Context.ExecuteQuery()
         write-host -f Green “Total List Items Copied from ‘$SourceListTitle’ to ‘$TargetListTitle’ : $counter”
     }
     Catch {
